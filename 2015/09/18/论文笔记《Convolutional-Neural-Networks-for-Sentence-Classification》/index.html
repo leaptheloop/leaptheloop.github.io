@@ -1,0 +1,748 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.1"/>
+
+
+    <meta name="description" content="属性GEEK, 冷静思考
+专注DeepLearning/NLP/CV
+从菜鸟做起，先行动，再谈梦想。" />
+
+
+
+  <meta name="keywords" content="cnn,sentenceclassification,论文," />
+
+
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/img/favicon.ico?v=0.4.5.1" />
+
+
+<meta name="description" content="第一篇paper笔记，以后要继续保持这个好习惯。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文笔记《Convolutional Neural Networks for Sentence Classification》">
+<meta property="og:url" content="http://lan2720.github.io/2015/09/18/论文笔记《Convolutional-Neural-Networks-for-Sentence-Classification》/index.html">
+<meta property="og:site_name" content="Hakuna Matata">
+<meta property="og:description" content="第一篇paper笔记，以后要继续保持这个好习惯。">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/901f9a6fgw1ew44uf4s6bj21f40kgtdd.jpg">
+<meta property="og:updated_time" content="2015-09-18T04:23:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="论文笔记《Convolutional Neural Networks for Sentence Classification》">
+<meta name="twitter:description" content="第一篇paper笔记，以后要继续保持这个好习惯。">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+  <title> 论文笔记《Convolutional Neural Networks for Sentence Classification》 | Hakuna Matata </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9df4ceec6aad0e521753edbb3b445837";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand" rel="start">
+      <span class="logo">
+        <i class="icon-next-logo"></i>
+      </span>
+      <span class="site-title">Hakuna Matata</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon icon-next-home"></i> <br />
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            <i class="menu-item-icon icon-next-about"></i> <br />
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            <i class="menu-item-icon icon-next-archives"></i> <br />
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            <i class="menu-item-icon icon-next-tags"></i> <br />
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-深度学习资源">
+          <a href="/深度学习资源" rel="section">
+            <i class="menu-item-icon icon-next-深度学习资源"></i> <br />
+            深度学习资源
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-机器学习资源">
+          <a href="/机器学习资源" rel="section">
+            <i class="menu-item-icon icon-next-机器学习资源"></i> <br />
+            机器学习资源
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-其他资源">
+          <a href="/其他资源" rel="section">
+            <i class="menu-item-icon icon-next-其他资源"></i> <br />
+            其他资源
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-常用工具">
+          <a href="/常用工具" rel="section">
+            <i class="menu-item-icon icon-next-常用工具"></i> <br />
+            常用工具
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content"> 
+
+  <div id="posts" class="posts-expand">
+    
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              论文笔记《Convolutional Neural Networks for Sentence Classification》
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于
+          <time itemprop="dateCreated" datetime="2015-09-18T11:51:13+08:00" content="2015-09-18">
+            2015-09-18
+          </time>
+        </span>
+
+        
+
+        
+          
+            <span class="post-comments-count">
+              &nbsp; | &nbsp;
+              <a href="/2015/09/18/论文笔记《Convolutional-Neural-Networks-for-Sentence-Classification》/#comments" itemprop="discussionUrl">
+                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/18/论文笔记《Convolutional-Neural-Networks-for-Sentence-Classification》/" itemprop="commentsCount"></span>
+              </a>
+            </span>
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><p>研一的生活就这样开始了，新的起点，奋斗！</p>
+<p>言归正传，这篇论文是stanford cs224d <a href="http://cs224d.stanford.edu/lectures/CS224d-Lecture13.pdf" target="_blank" rel="external">lec13</a>提到的Kim(2014)。只有短短6页，没什么新颖的结果，只是简单记录下作者的写作思路吧。<br>论文地址：<a href="http://arxiv.org/pdf/1408.5882" target="_blank" rel="external">http://arxiv.org/pdf/1408.5882</a></p>
+<h2 id="Abstract">Abstract</h2><p>摘要里面讲了如下几点：</p>
+<ol>
+<li>在sentence classfication任务中，我们用cnn进行了一系列实验。</li>
+<li>直接用word2vec得到的static vectors，超参不怎么调就能得到比较好的结果。</li>
+<li>对word2vec的word vectors进行针对性的fine-tuning，会得到更好的结果。</li>
+<li>另外，对cnn模型进行了小改动：将static vectors和non static vectors变成cnn模型中的两个channels，尤如图像中的rgb三通道。</li>
+<li>测试了7个tasks，有4个tasks得到state of art的结果，其中包括sentiment analysis和question classification。</li>
+</ol>
+<h2 id="Model">Model</h2><p><img src="http://ww3.sinaimg.cn/large/901f9a6fgw1ew44uf4s6bj21f40kgtdd.jpg" alt=""><br>整个论文中用到的cnn模型就是这样的。<br>$x_i\in R^k$表示一个sentence中的第i个word，记为$x_i$，它是一个k维的词向量。上图中，一排就代表一个词向量。<br>一个sentence中的word个数为n。</p>
+<h3 id="关于convolution">关于convolution</h3><p><em>filter</em>：$w\in R^{hk}$意思是作为filter的权重矩阵是h*k的。如果h=2，就是相邻的两个word做一次卷积，如果h=3，即为3个word做一次卷积，以此类推。<br>卷积之后的结果再经过激活函数$f$就得到了feature，记为$c_i$。它是由$x_{i:i+h-1}$相邻的h个words卷积得到的值，再activation之后的值，也是当前层的输出。<br>卷积之后的值：$w \cdot x_{i:i+h-1} +b$<br>输出的feature值$c_i=f(w \cdot x_{i:i+h-1} +b)$<br>窗口大小：$h$<br>这样之后，一个n长度的sentence就有[$x_{1:h}$， $x_{2:h+1}$，$x_{3:h+2}$，…，$x_{n-h+1:n}$]这些word windows，卷积后的结果就是$c$ = [$c_1,c_2, …, c_{n-h+1}$]，维度为(1，n-h+1)<br>然后进行池化max pooling，选出最重要的feature。pooling scheme可以根据句子的长度来选择。</p>
+<h3 id="关于feature">关于feature</h3><p>一个filter只能提取一种feature，论文中的model用多种filter（不同的window size）来获取多种features。</p>
+<h3 id="关于two_channels_of_word_vectors">关于two channels of word vectors</h3><p>one channel将word2vec得到的结果直接static的传入整个模型，另一个channel在BP训练过程中要进行fine-tune。每一个filter都要分别应用到这两个channels上。<br>例如上图中就能看出，系统有2 filters，对2个channels分别卷积后得到4 stacks。</p>
+<h2 id="Regularization">Regularization</h2><p>一句话总结，dropout+l2-norm。</p>
+<h3 id="dropout">dropout</h3><p>有一点需要注意：<br>train time按一定概率p对每层的输入神经元进行dropout。<br>test time时将学到的weights rescale成$\hat w = p*w$，得到的$\hat w$应用于unseen sentences，期间不需要dropout。</p>
+<h3 id="L2_norm">L2 norm</h3><p>$|w|_2=s$ whenever $|w|_2&gt;s$</p>
+<h2 id="Datasets_and_Experimental_Setup">Datasets and Experimental Setup</h2><p>MR : Movie reviews. positive/negative<br>SST-1 : an extention of MR with train/dev/test splits and very fine-grained labels.<br>SST-2 : same as SST-1 but without neutral reviews.<br>Subj : classify a sentence as being subjective or objective.<br>TREC : classify a question into 6 question types.<br>CR : customer reviews. predict positive or negative.<br>MPQA : opinion polarity detection.</p>
+<h2 id="Hyperparameters_and_Training">Hyperparameters and Training</h2><ul>
+<li>rectified linear units</li>
+<li>filter windows(h) : 3, 4, 5</li>
+<li>100 feature maps for each filter window</li>
+<li>mini-batch size : 50</li>
+<li>adadelta update rule</li>
+</ul>
+<p>以上参数是由grid search 在SST-2 dev set上选出来的。</p>
+<p>所做的唯一dataset-specific fining : early stopping on dev set</p>
+<h2 id="Pre-trained_Word_Vectors">Pre-trained Word Vectors</h2><p>当手头上没有large supervised training dataset的时候，用word2vec（或相似的unsupervised nlp模型得到）初始化word vectors能提高performance。</p>
+<h3 id="word2vec_vectors">word2vec vectors</h3><ul>
+<li>publicly available</li>
+<li>trained on 100 billion words from Goo </li>
+<li>dimension of 300</li>
+<li>没出现在如word2vec这类pre-trained set中的words将随机初始化</li>
+</ul>
+<h2 id="Model_Variations">Model Variations</h2><ul>
+<li>CNN-rand : 所有的word vector都是随机初始化的，在训练过程中更新</li>
+<li>CNN-static : word vector用word2vec得出的结果，在整个train process中所有的words保持不变，只学习其他参数</li>
+<li>CNN-non-static : pretrained vector在训练过程中要被fine-tuned</li>
+<li>CNN-multichannel : two sets of word vectors. 初始化时两个channel都直接赋值word2vec得出的结果，每个filter也会分别applied到两个channel，但是训练过程中只有一个channel会进行BP</li>
+</ul>
+<p>模型中除了这些参数改变，其他参数相同。</p>
+<h2 id="Results_and_Discussion">Results and Discussion</h2><p>用了pre-trained vectors（cnn-static）就有明显的提高。pretrained vector相当于“universal” feature extractors，fine-tuned后可以在很多tasks上表现出色。</p>
+<h3 id="Multichannel_vs-_Single_Channel_Models">Multichannel vs. Single Channel Models</h3><p>一句话总结，加一个通道之后的效果是mixed。</p>
+<h3 id="Static_vs-_Non-static_Representations">Static vs. Non-static Representations</h3><p>一句话，non-static更适应specific task</p>
+<h2 id="Further_Observations">Further Observations</h2><ul>
+<li>Max-TDNN效果只有37.4%但是我们有45%的原因是我们的cnn有更大的capacity，多个filter width（3，4，5）和多个feature maps（100）</li>
+<li>dropout是很棒的regularization方法，可以使得network更大也不会过拟合，大概有2%-4%的提升。</li>
+<li>Adadelta和Adagrad得到的结果差不多，但是fewer epochs</li>
+</ul>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cnn/" rel="tag">#cnn</a>
+          
+            <a href="/tags/sentenceclassification/" rel="tag">#sentenceclassification</a>
+          
+            <a href="/tags/论文/" rel="tag">#论文</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/19/U盘安装ubuntu14-10的一大陷阱/" rel="prev">U盘安装ubuntu14.10的一大陷阱</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/14/贝叶斯分类的相关理论/" rel="next">贝叶斯分类的相关理论</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+ </div>
+
+        
+
+        
+          <div class="comments" id="comments">
+            
+              <div class="ds-thread" data-thread-key="2015/09/18/论文笔记《Convolutional-Neural-Networks-for-Sentence-Classification》/"
+                   data-title="论文笔记《Convolutional Neural Networks for Sentence Classification》" data-url="http://lan2720.github.io/2015/09/18/论文笔记《Convolutional-Neural-Networks-for-Sentence-Classification》/">
+              </div>
+            
+          </div>
+        
+      </div>
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="http://www.alchemyapi.com/sites/default/files/deepLearningAI500.png" alt="Lan" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">Lan</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">属性GEEK, 冷静思考
+专注DeepLearning/NLP/CV
+从菜鸟做起，先行动，再谈梦想。</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">43</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lan2720" target="_blank">Github</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/loafer-527" target="_blank">Zhihu</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Abstract"><span class="nav-number">1.</span> <span class="nav-text">Abstract</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model"><span class="nav-number">2.</span> <span class="nav-text">Model</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于convolution"><span class="nav-number">2.1.</span> <span class="nav-text">关于convolution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于feature"><span class="nav-number">2.2.</span> <span class="nav-text">关于feature</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于two_channels_of_word_vectors"><span class="nav-number">2.3.</span> <span class="nav-text">关于two channels of word vectors</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Regularization"><span class="nav-number">3.</span> <span class="nav-text">Regularization</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dropout"><span class="nav-number">3.1.</span> <span class="nav-text">dropout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#L2_norm"><span class="nav-number">3.2.</span> <span class="nav-text">L2 norm</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Datasets_and_Experimental_Setup"><span class="nav-number">4.</span> <span class="nav-text">Datasets and Experimental Setup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hyperparameters_and_Training"><span class="nav-number">5.</span> <span class="nav-text">Hyperparameters and Training</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pre-trained_Word_Vectors"><span class="nav-number">6.</span> <span class="nav-text">Pre-trained Word Vectors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#word2vec_vectors"><span class="nav-number">6.1.</span> <span class="nav-text">word2vec vectors</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model_Variations"><span class="nav-number">7.</span> <span class="nav-text">Model Variations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Results_and_Discussion"><span class="nav-number">8.</span> <span class="nav-text">Results and Discussion</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Multichannel_vs-_Single_Channel_Models"><span class="nav-number">8.1.</span> <span class="nav-text">Multichannel vs. Single Channel Models</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Static_vs-_Non-static_Representations"><span class="nav-number">8.2.</span> <span class="nav-text">Static vs. Non-static Representations</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Further_Observations"><span class="nav-number">9.</span> <span class="nav-text">Further Observations</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner"> <div class="copyright" >
+  
+  &copy; &nbsp;  2015 - 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="icon-next-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lan</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+ </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"lan2720"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+  	<script src="/js/ua-parser.min.js"></script>
+  	<script src="/js/hook-duoshuo.js"></script>
+  
+
+    
+  
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.1"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.1"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.1" id="motion.global"></script>
+
+
+
+
+  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.1"></script>
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.1" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 0.4 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    var $tocContent = $('.post-toc-content');
+    if (isDesktop() && CONFIG.sidebar === 'post') {
+      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+        displaySidebar();
+      }
+    }
+  });
+</script>
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      if (CONFIG.sidebar === 'always') {
+        displaySidebar();
+      }
+      if (isMobile()) {
+        FastClick.attach(document.body);
+      }
+    });
+  </script>
+
+  
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/lazyload.js"></script>
+  <script type="text/javascript">
+    $(function () {
+      $("#posts").find('img').lazyload({
+        placeholder: "/images/loading.gif",
+        effect: "fadeIn"
+      });
+    });
+  </script>
+</body>
+</html>
