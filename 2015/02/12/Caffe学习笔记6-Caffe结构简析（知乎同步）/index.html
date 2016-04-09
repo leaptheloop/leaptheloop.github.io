@@ -1,0 +1,457 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu_union_verify" content="d1952c66cf48912e21c18c7c581f382a">
+  <meta name="360-site-verification" content="67fbcc5a67f4c65c057315b28fa0b2c8" />
+<meta name="google-site-verification" content="2GzxQ0VtXwTSUdmGm6DzcmhTzM_I9QmzCb_pzpMzD88" />
+  
+    <title>Caffe学习笔记6-Caffe结构简析（知乎同步） | GanYuFei (甘宇飞)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="YuFeiGan">
+    
+    <meta name="description" content="来自本人的知乎回答，全文同步
+我是从Torch7转移到Caffe的人，仅供参考，当你阅读前你应该具备一些有关DL的基础知识，本文集中写Caffe代码结构而非介绍DL知识。我是去年底开始看Caffe代码的，看代码的时间加在一起也不到一个月，也算半个新手，我的回答是从新手角度作一个入门阶段的经验分享。
+">
+    
+    
+    
+    
+    <link rel="alternate" href="atom.xml" title="GanYuFei (甘宇飞)" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/me.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            var _bdId ='b387da309ab942c987abb425db49bcc7';
+             hm.src = "//hm.baidu.com/hm.js?" + _bdId;
+             var s = document.getElementsByTagName("script")[0]; 
+             s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+     
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="GanYuFei (甘宇飞)">GanYuFei (甘宇飞)</a></h1>
+				<a class="blog-motto">To improve is to change, to perfect is to change often.</a>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/#blog">Blog</a></li>
+					
+						<li><a href="/About">About</a></li>
+					
+					<li>
+					
+                                            <form class="search" action=http://yufeigan.github.io target="_blank">
+                                            <label>Search</label>
+                                        <input name="s" type="hidden" value= null ><input type="text" name="q" size="30" placeholder="搜索"><br>
+					
+					</li>
+				</ul>
+                            </nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/02/12/Caffe学习笔记6-Caffe结构简析（知乎同步）/" title="Caffe学习笔记6-Caffe结构简析（知乎同步）" itemprop="url">Caffe学习笔记6-Caffe结构简析（知乎同步）</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="YuFeiGan">YuFeiGan</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2015-02-12T08:53:57.000Z" itemprop="datePublished">2015-02-12</time>
+    更新日期:<time datetime="2015-02-12T09:50:55.000Z" itemprop="dateModified">2015-02-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#初识Caffe"><span class="toc-number">1.</span> <span class="toc-text">初识Caffe</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Caffe进阶"><span class="toc-number">2.</span> <span class="toc-text">Caffe进阶</span></a></li></ol>
+		</div>
+		
+		<p>来自本人的知乎回答，<a href="http://www.zhihu.com/question/27982282/answer/39350629" target="_blank" rel="external">全文同步</a></p>
+<p>我是从Torch7转移到Caffe的人，仅供参考，当你阅读前你应该具备一些有关DL的基础知识，本文集中写Caffe代码结构而非介绍DL知识。<br>我是去年底开始看Caffe代码的，看代码的时间加在一起也不到一个月，也算半个新手，我的回答是从新手角度作一个入门阶段的经验分享。</p>
+<p>本文只涉及Caffe结构的相关问题，不涉及具体实现技巧等细节。</p>
+<p>==============================================================</p>
+<h3 id="初识Caffe">初识Caffe</h3><p>1.1. Caffe相对与其他DL框架的优点和缺点：<br>优点：<br>速度快。Google Protocol Buffer数据标准为Caffe提升了效率<br>更新快。还在不断地完善中，以后功能也会越来越多<br>缺点：<br>更新快。有人反映，偶尔会出现接口变换的情况，自己很久前写的代码可能过了一段时间就不能和新版本很好地兼容了。<br>对于某些研究方向来说的人并不适合。这个需要对Caffe的结构有一定了解，（后面提到）。<br>1.2. Caffe代码层次。<br>回答里面有人说熟悉Blob，Layer，Net，Solver这样的几大类，我比较赞同。我基本是从这个顺序开始学习的，这四个类复杂性从低到高，贯穿了整个Caffe。把他们分为三个层次介绍。<br>Blob：是基础的数据结构，是用来保存学习到的参数以及网络传输过程中产生数据的类。<br>Layer：是网络的基本单元，由此派生出了各种层类。修改这部分的人主要是研究特征表达方向的。<br>Net：是网络的搭建，将Layer所派生出层类组合成网络。Solver：是Net的求解，修改这部分人主要会是研究DL求解方向的。</p>
+<p>==============================================================</p>
+<h3 id="Caffe进阶">Caffe进阶</h3><p>2.1. Blob：<br>Caffe支持CUDA，在数据级别上也做了一些优化，这部分最重要的是知道它主要是对protocol buffer所定义的数据结构的继承，Caffe也因此可以在尽可能小的内存占用下获得很高的效率。（追求性能的同时Caffe也牺牲了一些代码可读性）<br>在更高一级的Layer中Blob用下面的形式表示学习到的参数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">shared_ptr</span>&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;</span><br></pre></td></tr></table></figure></p>
+<p>这里使用的是一个Blob的容器是因为某些Layer包含多组学习参数，比如多个卷积核的卷积层。<br>以及Layer所传递的数据形式，后面还会涉及到这里：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; &amp;bottom;</span><br><span class="line"><span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; *top</span><br></pre></td></tr></table></figure></p>
+<p>2.2. Layer：<br>2.2.1. 5大Layer派生类型<br>Caffe十分强调网络的层次性，也就是说卷积操作，非线性变换（ReLU等），Pooling，权值连接等全部都由某一种Layer来表示。具体来说分为5大类Layer<br>NeuronLayer类 定义于neuron_layers.hpp中，其派生类主要是元素级别的运算（比如Dropout运算，激活函数ReLu，Sigmoid等），运算均为同址计算（in-place computation，返回值覆盖原值而占用新的内存）。<br>LossLayer类 定义于loss_layers.hpp中，其派生类会产生loss，只有这些层能够产生loss。<br>数据层 定义于data_layer.hpp中，作为网络的最底层，主要实现数据格式的转换。<br>特征表达层（我自己分的类）定义于vision_layers.hpp（为什么叫vision这个名字，我目前还不清楚），实现特征表达功能，更具体地说包含卷积操作，Pooling操作，他们基本都会产生新的内存占用（Pooling相对较小）。<br>网络连接层和激活函数（我自己分的类）定义于common_layers.hpp，Caffe提供了单个层与多个层的连接，并在这个头文件中声明。这里还包括了常用的全连接层InnerProductLayer类。<br>2.2.2. Layer的重要成员函数<br>在Layer内部，数据主要有两种传递方式，正向传导（Forward）和反向传导（Backward）。Forward和Backward有CPU和GPU（部分有）两种实现。Caffe中所有的Layer都要用这两种方法传递数据。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Forward</span><span class="params">(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; &amp;bottom,                     </span><br><span class="line">                     <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; *top)</span> </span>= <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Backward</span><span class="params">(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; &amp;top,</span><br><span class="line">                      <span class="keyword">const</span> <span class="built_in">vector</span>&lt;<span class="keyword">bool</span>&gt; &amp;propagate_down, </span><br><span class="line">                      <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt; *bottom)</span> </span>= <span class="number">0</span>;</span><br></pre></td></tr></table></figure></p>
+<p>Layer类派生出来的层类通过这实现这两个虚函数，产生了各式各样功能的层类。Forward是从根据bottom计算top的过程，Backward则相反（根据top计算bottom）。注意这里为什么用了一个包含Blob的容器（vector），对于大多数Layer来说输入和输出都各连接只有一个Layer，然而对于某些Layer存在一对多的情况，比如LossLayer和某些连接层。在网路结构定义文件（*.proto）中每一层的参数bottom和top数目就决定了vector中元素数目。<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">layers</span> &#123;</span><br><span class="line">  <span class="attribute">bottom</span>: <span class="string">"decode1neuron"</span>   <span class="comment">// 该层底下连接的第一个Layer</span></span><br><span class="line">  <span class="attribute">bottom</span>: <span class="string">"flatdata"</span>        <span class="comment">// 该层底下连接的第二个Layer</span></span><br><span class="line">  <span class="attribute">top</span>: <span class="string">"l2_error"</span>           <span class="comment">// 该层顶上连接的一个Layer</span></span><br><span class="line">  <span class="attribute">name</span>: <span class="string">"loss"</span>              <span class="comment">// 该层的名字</span></span><br><span class="line">  <span class="attribute">type</span>: EUCLIDEAN_LOSS      <span class="comment">// 该层的类型</span></span><br><span class="line">  <span class="attribute">loss_weight</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2.2.3. Layer的重要成员变量<br>loss<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;Dtype&gt; loss_;</span><br></pre></td></tr></table></figure></p>
+<p>每一层又有一个loss<em>值，只不多大多数Layer都是0，只有LossLayer才可能产生非0的loss</em>。计算loss是会把所有层的loss_相加。<br>learnable parameters<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">shared_ptr</span>&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;</span><br></pre></td></tr></table></figure></p>
+<p>前面提到过的，Layer学习到的参数。<br>2.3. Net：<br>Net用容器的形式将多个Layer有序地放在一起，其自身实现的功能主要是对逐层Layer进行初始化，以及提供Update( )的接口（更新网络参数），本身不能对参数进行有效地学习过程。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">shared_ptr</span>&lt;Layer&lt;Dtype&gt; &gt; &gt; layers_;</span><br></pre></td></tr></table></figure></p>
+<p>同样Net也有它自己的<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;*&gt;&amp; Forward(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;Blob&lt;Dtype&gt;* &gt; &amp; bottom,</span><br><span class="line">                              Dtype* loss = NULL);</span><br><span class="line"><span class="keyword">void</span> Net&lt;Dtype&gt;::Backward();</span><br></pre></td></tr></table></figure></p>
+<p>他们是对整个网络的前向和方向传导，各调用一次就可以计算出网络的loss了。<br>2.4. Solver<br>这个类中包含一个Net的指针，主要是实现了训练模型参数所采用的优化算法，它所派生的类就可以对整个网络进行训练了。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">shared_ptr</span>&lt;Net&lt;Dtype&gt; &gt; net_;</span><br></pre></td></tr></table></figure></p>
+<p>不同的模型训练方法通过重载函数ComputeUpdateValue( )实现计算update参数的核心功能<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">ComputeUpdateValue</span><span class="params">()</span> </span>= <span class="number">0</span>;</span><br></pre></td></tr></table></figure></p>
+<p>最后当进行整个网络训练过程（也就是你运行Caffe训练某个模型）的时候，实际上是在运行caffe.cpp中的train( )函数，而这个函数实际上是实例化一个Solver对象，初始化后调用了Solver中的Solve( )方法。而这个Solve( )函数主要就是在迭代运行下面这两个函数，就是刚才介绍的哪几个函数。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ComputeUpdateValue();</span><br><span class="line">net_-&gt;Update();</span><br></pre></td></tr></table></figure></p>
+<p>==============================================================</p>
+<p>至此，从底层到顶层对Caffe的主要结构都应该有了大致的概念。为了集中重点介绍Caffe的代码结构，文中略去了大量Caffe相关的实现细节和技巧，比如Layer和Net的参数如何初始化，proto文件的定义，基于cblas的卷积等操作的实现（cblas实现卷积这一点我的个人主页GanYuFei中的《Caffe学习笔记5-BLAS与boost::thread加速》有介绍）等等就不一一列举了。</p>
+<p>整体来看Layer部分代码最多，也反映出Caffe比较重视丰富网络单元的类型，然而由于Caffe的代码结构高度层次化，使得某些研究以及应用（比如研究类似非逐层连接的神经网络这种复杂的网络连接方式）难以在该平台实现。这也就是一开始说的一个不足。</p>
+<p>另外，Caffe基本数据单元都用Blob，使得数据在内存中的存储变得十分高效，紧凑，从而提升了整体训练能力，而同时带来的问题是我们看见的一些可读性上的不便，比如forward的参数也是直接用Blob而不是设计一个新类以增强可读性。所以说性能的提升是以可读性为代价的。<br>最后一点也是最重要的一点，我从Caffe学到了很多。第一次看的C++项目就看到这么好的代码，实在是受益匪浅，在这里也感谢作者贾扬清等人的贡献。</p>
+<p>甘宇飞更新于2/12/2015</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Caffe/">Caffe</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LearningCaffe/">LearningCaffe</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2015/02/12/Caffe学习笔记6-Caffe结构简析（知乎同步）/" data-title="Caffe学习笔记6-Caffe结构简析（知乎同步） | GanYuFei (甘宇飞)" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/02/20/《Deep-Learning》-Bengio-读书笔记1-DL简介/" title="《Deep Learning》(Bengio)读书笔记1-DL简介">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  《Deep Learning》(Bengio)读书笔记1-DL简介</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/01/02/Caffe学习笔记5-BLAS与boost-thread加速/"  title="Caffe学习笔记5-BLAS与boost::thread加速">
+ <strong>NEXT:</strong><br/> 
+ <span>Caffe学习笔记5-BLAS与boost::thread加速
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+  <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#初识Caffe"><span class="toc-number">1.</span> <span class="toc-text">初识Caffe</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Caffe进阶"><span class="toc-number">2.</span> <span class="toc-text">Caffe进阶</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+<div id="authorInfo">
+	
+	<div class="social-list" class="clearfix">
+		
+		
+		
+		
+		
+	</div>
+</div>
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+			<li><a href="/categories/Book/" title="Book">Book<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Code/" title="Code">Code<sup>1</sup></a></li>
+		
+			<li><a href="/categories/LearningCaffe/" title="LearningCaffe">LearningCaffe<sup>6</sup></a></li>
+		
+			<li><a href="/categories/Note/" title="Note">Note<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Paper/" title="Paper">Paper<sup>2</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/BLAS/" title="BLAS">BLAS<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Boost/" title="Boost">Boost<sup>1</sup></a></li>
+		
+			<li><a href="/tags/CNN/" title="CNN">CNN<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Caffe/" title="Caffe">Caffe<sup>6</sup></a></li>
+		
+			<li><a href="/tags/DeepNet/" title="DeepNet">DeepNet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Optim/" title="Optim">Optim<sup>1</sup></a></li>
+		
+			<li><a href="/tags/PCANet/" title="PCANet">PCANet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Thread/" title="Thread">Thread<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Torch/" title="Torch">Torch<sup>2</sup></a></li>
+		
+			<li><a href="/tags/《Deep-Learning》/" title="《Deep Learning》">《Deep Learning》<sup>3</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">links to Me</p>
+    <ul>
+      <li><a href="https://github.com/YuFeiGan" target="_blank" title="Github">
+      	<img src="http://uxrepo.com/static/icon-sets/elusive/svg/github.svg" width="50" height="50" />
+      	My Github
+      </a></li>
+
+      <li><a href="http://www.zhihu.com/people/GanYuFei" target="_blank" title="知乎">
+      	<img src="http://static.dapps.net/uploads/2013/05/zhihu-icon.png" width="50" height="50" />
+      	My Zhihu
+      </a></li>
+
+      <li><a href="http://weibo.com/GanYvan" target="_blank" title="微博">
+      	<img src="http://gallery.mailchimp.com/db2f0ea3a68f632de3088eada/images/weibo.png" width="50" height="50" />
+      	My Weibo
+      </a></li>
+
+    </ul>
+</div>
+
+
+  
+  <div class="tagcloudlist">
+    <p class="asidetitle">標簽雲</p>
+    <div class="tagcloudlist clearfix">
+       <a href="/tags/BLAS/" style="font-size: 10px;">BLAS</a> <a href="/tags/Boost/" style="font-size: 10px;">Boost</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/Caffe/" style="font-size: 20px;">Caffe</a> <a href="/tags/DeepNet/" style="font-size: 10px;">DeepNet</a> <a href="/tags/Optim/" style="font-size: 10px;">Optim</a> <a href="/tags/PCANet/" style="font-size: 10px;">PCANet</a> <a href="/tags/Thread/" style="font-size: 10px;">Thread</a> <a href="/tags/Torch/" style="font-size: 13.33px;">Torch</a> <a href="/tags/《Deep-Learning》/" style="font-size: 16.67px;">《Deep Learning》</a>
+    </div>
+  </div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+    
+            <p class="copyright"> © 2015 
+		
+		<a href="http://yoursite.com" target="_blank" title="YuFeiGan">YuFeiGan</a>
+		
+            && Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> && Theme by <a href="http://gengbiao.me" target="_blank" title="coney">coney</a>
+            </div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"null"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-57209432-1', 'auto## e.g. gengbiao.me your google analytics site or set the value as auto.');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
+

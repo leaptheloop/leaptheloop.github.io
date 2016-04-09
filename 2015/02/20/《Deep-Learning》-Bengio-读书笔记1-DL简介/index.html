@@ -1,0 +1,456 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu_union_verify" content="d1952c66cf48912e21c18c7c581f382a">
+  <meta name="360-site-verification" content="67fbcc5a67f4c65c057315b28fa0b2c8" />
+<meta name="google-site-verification" content="2GzxQ0VtXwTSUdmGm6DzcmhTzM_I9QmzCb_pzpMzD88" />
+  
+    <title>《Deep Learning》(Bengio)读书笔记1-DL简介 | GanYuFei (甘宇飞)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="YuFeiGan">
+    
+    <meta name="description" content="此书尚未出版，该笔记仅供学习参考，原文见http://www.iro.umontreal.ca/~bengioy/dlbook/
+[P2]早期的AI是以IBM为的深蓝代表一类的简单的AI。
+人的知识与经验是主观和直觉的，因此难以用一种正式的方法表达出来。电脑却恰恰需要各种形式的知识去做决策。
+几个A">
+    
+    
+    
+    
+    <link rel="alternate" href="atom.xml" title="GanYuFei (甘宇飞)" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/me.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            var _bdId ='b387da309ab942c987abb425db49bcc7';
+             hm.src = "//hm.baidu.com/hm.js?" + _bdId;
+             var s = document.getElementsByTagName("script")[0]; 
+             s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+     
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="GanYuFei (甘宇飞)">GanYuFei (甘宇飞)</a></h1>
+				<a class="blog-motto">To improve is to change, to perfect is to change often.</a>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/#blog">Blog</a></li>
+					
+						<li><a href="/About">About</a></li>
+					
+					<li>
+					
+                                            <form class="search" action=http://yufeigan.github.io target="_blank">
+                                            <label>Search</label>
+                                        <input name="s" type="hidden" value= null ><input type="text" name="q" size="30" placeholder="搜索"><br>
+					
+					</li>
+				</ul>
+                            </nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/02/20/《Deep-Learning》-Bengio-读书笔记1-DL简介/" title="《Deep Learning》(Bengio)读书笔记1-DL简介" itemprop="url">《Deep Learning》(Bengio)读书笔记1-DL简介</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="YuFeiGan">YuFeiGan</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2015-02-20T07:43:28.000Z" itemprop="datePublished">2015-02-20</time>
+    更新日期:<time datetime="2015-02-26T07:53:56.000Z" itemprop="dateModified">2015-02-26</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+		</div>
+		
+		<p>此书尚未出版，该笔记仅供学习参考，原文见<a href="http://www.iro.umontreal.ca/~bengioy/dlbook/" target="_blank" rel="external">http://www.iro.umontreal.ca/~bengioy/dlbook/</a></p>
+<p>[P2]早期的AI是以IBM为的深蓝代表一类的简单的AI。</p>
+<p>人的知识与经验是主观和直觉的，因此难以用一种正式的方法表达出来。电脑却恰恰需要各种形式的知识去做决策。</p>
+<p>几个AI项目曾经探索用正式语言的硬编码去描述知识。计算机可以运用逻辑推断法则通过这些正式语言推断陈述。但这些AI项目的均未成功，[P3]其中最有名的就是Cyc（人们用十分复杂的语言来准确的描述世界）。</p>
+<p>hard-code所面临的困难说明AI系统需要有能力从原始数据中去获得他们自己的知识。这种能力就称为ML，ML的引入让计算机应付真实世界的问题并做出近乎于主观的决策。</p>
+<p>LR是一种简单的ML算法，曾被来预测是否推荐做剖腹产另一种叫做朴素贝叶斯的算法可以分辨垃圾邮件。</p>
+<p>我们称执行学习过程的代理为Learning Machine或者Learner，它将训练数据作为输入，产生函数。</p>
+<p>这些简单的ML算法的性能，非常依赖于所给数据的表达。Represent中的每一部分信息就是feature。LR学习每个feature所对应的不同的产生效果。然而LR无法学习出哪些特征有用，哪些特征无用，比如说若输入是像素点，单个像素点对后面的结果无关轻重。</p>
+<p>这个对表达的依赖是伴随计算机科学的普遍现象，表达的选择对ML算法的选择有极大的影响。</p>
+<p>[P4]许多AI问题通过设计恰当的特征的到解决，然后把这些特征给一个简单的ML算法。[还有些问题不能通过特征解决？]</p>
+<p>然而对于有些问题，什么特征应该别提取显得非常困难。比如车的轮子。</p>
+<p>一种解决方案是，让ML不光学习Representation到output的映射，还学习表达本身。这种方法称为Representation Learning，RL的效果往往比hand-designed representation要好。它们同样允许AI系统在最小的人工干预下快速适应新的问题。</p>
+<p>[P5]当设计特征的时候我们的目标往往是分离解释观测数据的变量因素。这里的factor仅是影响源，通常不包含mutiplication。这样的factor通常不是通过直接观察得到的，而是存在于人的思想中用来解释或推断观测数据的原因。这些factor可以被理解为帮助我们理解数据中大量变量的概念或抽象。</p>
+<p>真实世界中的AI应用的一个主要困难是许多factors影响每一个我们所观测的数据。许多应用希望我们从大量的factor中解脱出来并且摈弃我们不在乎的factor。</p>
+<p>当然，从原始数据中提取high-level抽象特征十分困难（不少需要人类级别的理解）。RL这一看无法解决这个问题。</p>
+<p>DL解决这个RL中的核心问题通过引入更简单的表达。DL允许电脑建立由简单概念产生的复杂概念。</p>
+<p>DL的另一个远景是他允许计算机学习一个多部的计算机程序（没看明白？？）</p>
+<p>Depth在这里不是数学严格定义上的意思。在DL中它没有正式的定义。有些方法大概表达学习的次数多，另一些方法中指计算的概念深。因为简单概念可以理解为复杂概念。</p>
+<p>[P7]简而言之，DL是一种AI方法，ML的一种类型。DL is a particular kind of ML that achieves great power and flexibility by learning to represent the world as a nested hierarchy of concepts with each concept defined in relation to simpler concepts.</p>
+<p>[P9]DL在过去5年中，对工业界和学术界产生了极大的影响，DL涉及到Learning multiple levels of representation。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/《Deep-Learning》/">《Deep Learning》</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Book/">Book</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2015/02/20/《Deep-Learning》-Bengio-读书笔记1-DL简介/" data-title="《Deep Learning》(Bengio)读书笔记1-DL简介 | GanYuFei (甘宇飞)" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/02/20/《Deep-Learning》-Bengio-读书笔记2-ML基本知识/" title="《Deep Learning》(Bengio)读书笔记2-ML基本知识">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  《Deep Learning》(Bengio)读书笔记2-ML基本知识</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/02/12/Caffe学习笔记6-Caffe结构简析（知乎同步）/"  title="Caffe学习笔记6-Caffe结构简析（知乎同步）">
+ <strong>NEXT:</strong><br/> 
+ <span>Caffe学习笔记6-Caffe结构简析（知乎同步）
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+  
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+<div id="authorInfo">
+	
+	<div class="social-list" class="clearfix">
+		
+		
+		
+		
+		
+	</div>
+</div>
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+			<li><a href="/categories/Book/" title="Book">Book<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Code/" title="Code">Code<sup>1</sup></a></li>
+		
+			<li><a href="/categories/LearningCaffe/" title="LearningCaffe">LearningCaffe<sup>6</sup></a></li>
+		
+			<li><a href="/categories/Note/" title="Note">Note<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Paper/" title="Paper">Paper<sup>2</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/BLAS/" title="BLAS">BLAS<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Boost/" title="Boost">Boost<sup>1</sup></a></li>
+		
+			<li><a href="/tags/CNN/" title="CNN">CNN<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Caffe/" title="Caffe">Caffe<sup>6</sup></a></li>
+		
+			<li><a href="/tags/DeepNet/" title="DeepNet">DeepNet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Optim/" title="Optim">Optim<sup>1</sup></a></li>
+		
+			<li><a href="/tags/PCANet/" title="PCANet">PCANet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Thread/" title="Thread">Thread<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Torch/" title="Torch">Torch<sup>2</sup></a></li>
+		
+			<li><a href="/tags/《Deep-Learning》/" title="《Deep Learning》">《Deep Learning》<sup>3</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">links to Me</p>
+    <ul>
+      <li><a href="https://github.com/YuFeiGan" target="_blank" title="Github">
+      	<img src="http://uxrepo.com/static/icon-sets/elusive/svg/github.svg" width="50" height="50" />
+      	My Github
+      </a></li>
+
+      <li><a href="http://www.zhihu.com/people/GanYuFei" target="_blank" title="知乎">
+      	<img src="http://static.dapps.net/uploads/2013/05/zhihu-icon.png" width="50" height="50" />
+      	My Zhihu
+      </a></li>
+
+      <li><a href="http://weibo.com/GanYvan" target="_blank" title="微博">
+      	<img src="http://gallery.mailchimp.com/db2f0ea3a68f632de3088eada/images/weibo.png" width="50" height="50" />
+      	My Weibo
+      </a></li>
+
+    </ul>
+</div>
+
+
+  
+  <div class="tagcloudlist">
+    <p class="asidetitle">標簽雲</p>
+    <div class="tagcloudlist clearfix">
+       <a href="/tags/BLAS/" style="font-size: 10px;">BLAS</a> <a href="/tags/Boost/" style="font-size: 10px;">Boost</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/Caffe/" style="font-size: 20px;">Caffe</a> <a href="/tags/DeepNet/" style="font-size: 10px;">DeepNet</a> <a href="/tags/Optim/" style="font-size: 10px;">Optim</a> <a href="/tags/PCANet/" style="font-size: 10px;">PCANet</a> <a href="/tags/Thread/" style="font-size: 10px;">Thread</a> <a href="/tags/Torch/" style="font-size: 13.33px;">Torch</a> <a href="/tags/《Deep-Learning》/" style="font-size: 16.67px;">《Deep Learning》</a>
+    </div>
+  </div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+    
+            <p class="copyright"> © 2015 
+		
+		<a href="http://yoursite.com" target="_blank" title="YuFeiGan">YuFeiGan</a>
+		
+            && Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> && Theme by <a href="http://gengbiao.me" target="_blank" title="coney">coney</a>
+            </div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"null"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-57209432-1', 'auto## e.g. gengbiao.me your google analytics site or set the value as auto.');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
+
