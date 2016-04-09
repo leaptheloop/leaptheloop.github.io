@@ -1,0 +1,484 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu_union_verify" content="d1952c66cf48912e21c18c7c581f382a">
+  <meta name="360-site-verification" content="67fbcc5a67f4c65c057315b28fa0b2c8" />
+<meta name="google-site-verification" content="2GzxQ0VtXwTSUdmGm6DzcmhTzM_I9QmzCb_pzpMzD88" />
+  
+    <title>Deep Learning 优化方法总结 | GanYuFei (甘宇飞)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="YuFeiGan">
+    
+    <meta name="description" content="Stochastic Gradient Descent (SGD)SGD的参数在使用随机梯度下降（SGD）的学习方法时，一般来说有以下几个可供调节的参数:
+
+Learning Rate             学习率
+Weight Decay                 权值衰减
+Momentu">
+    
+    
+    
+    
+    <link rel="alternate" href="atom.xml" title="GanYuFei (甘宇飞)" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/me.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            var _bdId ='b387da309ab942c987abb425db49bcc7';
+             hm.src = "//hm.baidu.com/hm.js?" + _bdId;
+             var s = document.getElementsByTagName("script")[0]; 
+             s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+     
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="GanYuFei (甘宇飞)">GanYuFei (甘宇飞)</a></h1>
+				<a class="blog-motto">To improve is to change, to perfect is to change often.</a>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/#blog">Blog</a></li>
+					
+						<li><a href="/About">About</a></li>
+					
+					<li>
+					
+                                            <form class="search" action=http://yufeigan.github.io target="_blank">
+                                            <label>Search</label>
+                                        <input name="s" type="hidden" value= null ><input type="text" name="q" size="30" placeholder="搜索"><br>
+					
+					</li>
+				</ul>
+                            </nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/11/29/Deep-Learning-优化方法总结/" title="Deep Learning 优化方法总结" itemprop="url">Deep Learning 优化方法总结</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="YuFeiGan">YuFeiGan</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2014-11-29T06:33:16.000Z" itemprop="datePublished">2014-11-29</time>
+    更新日期:<time datetime="2015-07-01T13:01:06.000Z" itemprop="dateModified">2015-07-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Stochastic_Gradient_Descent_(SGD)"><span class="toc-number">1.</span> <span class="toc-text">Stochastic Gradient Descent (SGD)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SGD的参数"><span class="toc-number">1.1.</span> <span class="toc-text">SGD的参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Learning_Rate"><span class="toc-number">1.1.1.</span> <span class="toc-text">Learning Rate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Weight_decay"><span class="toc-number">1.1.2.</span> <span class="toc-text">Weight decay</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Learning_Rate_Decay"><span class="toc-number">1.1.3.</span> <span class="toc-text">Learning Rate Decay</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Momentum"><span class="toc-number">1.1.4.</span> <span class="toc-text">Momentum</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SGD优缺点"><span class="toc-number">1.2.</span> <span class="toc-text">SGD优缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Averaged_Stochastic_Gradient_Descent_(ASGD)"><span class="toc-number">2.</span> <span class="toc-text">Averaged Stochastic Gradient Descent (ASGD)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ASGD的参数"><span class="toc-number">2.1.</span> <span class="toc-text">ASGD的参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ASGD优缺点"><span class="toc-number">2.2.</span> <span class="toc-text">ASGD优缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-_Conjugate_Gradient（共轭梯度法）"><span class="toc-number">3.</span> <span class="toc-text">3. Conjugate Gradient（共轭梯度法）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Limited-memory_Broyden-Fletcher-Goldfarb-Shanno_(LBFGS)_(一种拟牛顿算法)"><span class="toc-number">4.</span> <span class="toc-text">Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS) (一种拟牛顿算法)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#应用分析"><span class="toc-number">5.</span> <span class="toc-text">应用分析</span></a></li></ol>
+		</div>
+		
+		<h1 id="Stochastic_Gradient_Descent_(SGD)">Stochastic Gradient Descent (SGD)</h1><h2 id="SGD的参数">SGD的参数</h2><p>在使用随机梯度下降（SGD）的学习方法时，一般来说有以下几个可供调节的参数:</p>
+<ul>
+<li>Learning Rate             学习率</li>
+<li>Weight Decay                 权值衰减</li>
+<li>Momentum                     动量</li>
+<li>Learning Rate Decay        学习率衰减</li>
+</ul>
+<p>再此之中只有第一的参数（Learning Rate）是必须的，其余部分都是为了提高自适应性的参数，也就是说后3个参数不需要时可以设为0。</p>
+<h3 id="Learning_Rate">Learning Rate</h3><p>学习率决定了权值更新的速度，设置得太大会使结果越过最优值，太小会使下降速度过慢。仅靠人为干预调整参数需要不断修改学习率，因此后面3种参数都是基于自适应的思路提出的解决方案。<br>$$w_i←w_i-\eta\frac{\partial{E}}{\partial{w_i}}$$</p>
+<h3 id="Weight_decay"><a href="http://stats.stackexchange.com/questions/29130/difference-between-neural-net-weight-decay-and-learning-rate" target="_blank" rel="external">Weight decay</a></h3><p>在实际运用中，为了避免模型的over-fitting，需要对cost function加入规范项，在SGD中我们加入$−ηλw_i$这一项来对cost function进行规范化。<br>$$w_i←w_i-\eta\frac{\partial{E}}{\partial{w_i}}-\eta\lambda w_i$$<br>这个公式的基本思路是减小不重要的参数对结果的影响，而有用的权重则不会受到Weight decay的影响，这种思路与Dropout的思路原理上十分相似。</p>
+<p><a href="http://www.faqs.org/faqs/ai-faq/neural-nets/part3/section-6.html" target="_blank" rel="external">Link 1</a><br><a href="http://www.cnblogs.com/matthewbai/p/4126551.html" target="_blank" rel="external">Link 2</a></p>
+<h3 id="Learning_Rate_Decay"><a href="http://bengio.abracadoudou.com/lectures/old/tex_ann.pdf" target="_blank" rel="external">Learning Rate Decay</a></h3><p>一种提高SGD寻优能力的方法，具体做法是每次迭代减小学习率的大小。</p>
+<ul>
+<li>initial learning rate $\eta=\eta_0$</li>
+<li>learning rate decay $\eta_d$</li>
+<li>At each iteration $s$:</li>
+</ul>
+<p>$$\eta(s)=\frac{\eta_0}{1+s\cdot{\eta_d}}$$<br>在许多论文中，另一种比较常见的方法是迭代30-50次左右直接对学习率进行操作($\eta←0.5\cdot\eta$)</p>
+<h3 id="Momentum"><a href="http://www.willamette.edu/~gorr/classes/cs449/momrate.html" target="_blank" rel="external">Momentum</a></h3><p>灵感来自于牛顿第一定律，基本思路是为寻优加入了“惯性”的影响，这样一来，当误差曲面中存在平坦区SGD可以一更快的速度学习。<br>$$w_i←m\cdot w_i-\eta\frac{\partial{E}}{\partial{w_i}}$$<br><code>注意：这里的表示方法并没有统一的规定，这里只是其中一种</code></p>
+<p><a href="http://ufldl.stanford.edu/tutorial/supervised/OptimizationStochasticGradientDescent/" target="_blank" rel="external">Link 1</a><br><a href="http://brahms.cpmc.columbia.edu/publications/momentum.pdf" target="_blank" rel="external">Link 2</a><br><a href="http://www.iro.umontreal.ca/~pift6266/H10/notes/gradient.html" target="_blank" rel="external">Link 3</a><br><a href="http://www.jmlr.org/proceedings/papers/v28/sutskever13.pdf" target="_blank" rel="external">Link 4</a></p>
+<h2 id="SGD优缺点">SGD优缺点</h2><ul>
+<li>实现简单，当训练样本足够多时优化速度非常快</li>
+<li>需要人为调整很多参数，比如学习率，收敛准则等</li>
+</ul>
+<h1 id="Averaged_Stochastic_Gradient_Descent_(ASGD)">Averaged Stochastic Gradient Descent (ASGD)</h1><p>在SGD的基础上计算了权值的平均值。<br>$$\bar{w}<em>t=\frac{1}{t-t_0}\sum^t</em>{i=t_0+1} w_t$$</p>
+<h2 id="ASGD的参数">ASGD的参数</h2><p>在SGD的基础上增加参数$t_0$</p>
+<ul>
+<li>学习率 $\eta$</li>
+<li>参数 $t_0$</li>
+</ul>
+<h2 id="ASGD优缺点">ASGD优缺点</h2><ul>
+<li>运算花费和second order stochastic gradient descent (2SGD)一样小。</li>
+<li>比SGD的训练速度更为缓慢。</li>
+<li>$t_0$的设置十分困难</li>
+</ul>
+<p><a href="http://cilvr.cs.nyu.edu/diglib/lsml/bottou-sgd-tricks-2012.pdf" target="_blank" rel="external">Link 1</a></p>
+<h1 id="3-_Conjugate_Gradient（共轭梯度法）">3. Conjugate Gradient（共轭梯度法）</h1><p>介于最速下降法与牛顿法之间的一个方法，它仅仅需要利用一阶导数的信息，克服了GD方法收敛慢的特点。</p>
+<p><a href="http://baike.baidu.com/view/2565822.htm?fr=aladdin" target="_blank" rel="external">Link 1</a></p>
+<h1 id="Limited-memory_Broyden-Fletcher-Goldfarb-Shanno_(LBFGS)_(一种拟牛顿算法)">Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS) (一种拟牛顿算法)</h1><p>L-BFGS算法比较适合在大规模的数值计算中，具备牛顿法收敛速度快的特点，但不需要牛顿法那样存储Hesse矩阵，因此节省了大量的空间以及计算资源。</p>
+<p><a href="http://blog.sina.com.cn/s/blog_5f234d47010162f7.html" target="_blank" rel="external">Link 1</a><br><a href="http://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm" target="_blank" rel="external">Link 2</a><br><a href="http://blog.sina.com.cn/s/blog_eb3aea990101gflj.html" target="_blank" rel="external">Link 3</a></p>
+<h1 id="应用分析"><a href="http://www.tuicool.com/articles/ZJR7Zb" target="_blank" rel="external">应用分析</a></h1><p>不同的优化算法有不同的优缺点，适合不同的场合:</p>
+<ul>
+<li>LBFGS算法在参数的维度比较低（一般指小于10000维）时的效果要比SGD（随机梯度下降）和CG（共轭梯度下降）效果好，特别是带有convolution的模型。</li>
+<li>针对高维的参数问题，CG的效果要比另2种好。也就是说一般情况下，SGD的效果要差一些，这种情况在使用GPU加速时情况一样，即在GPU上使用LBFGS和CG时，优化速度明显加快，而SGD算法优化速度提高很小。</li>
+<li>在单核处理器上，LBFGS的优势主要是利用参数之间的2阶近视特性来加速优化，而CG则得得益于参数之间的共轭信息，需要计算器Hessian矩阵。</li>
+</ul>
+<p><a href="http://www.52nlp.cn/unconstrained-optimization-one" target="_blank" rel="external">Link 1</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Optim/">Optim</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Note/">Note</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2014/11/29/Deep-Learning-优化方法总结/" data-title="Deep Learning 优化方法总结 | GanYuFei (甘宇飞)" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/12/09/Caffe学习笔记1-安装以及代码结构/" title="Caffe学习笔记1-安装以及代码结构">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  Caffe学习笔记1-安装以及代码结构</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/11/25/PCANet-A-Simple-Deep-Learning-Baseline-for-Image-Classification/"  title="PCANet A Simple Deep Learning Baseline for Image Classification?">
+ <strong>NEXT:</strong><br/> 
+ <span>PCANet A Simple Deep Learning Baseline for Image Classification?
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Stochastic_Gradient_Descent_(SGD)"><span class="toc-number">1.</span> <span class="toc-text">Stochastic Gradient Descent (SGD)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SGD的参数"><span class="toc-number">1.1.</span> <span class="toc-text">SGD的参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Learning_Rate"><span class="toc-number">1.1.1.</span> <span class="toc-text">Learning Rate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Weight_decay"><span class="toc-number">1.1.2.</span> <span class="toc-text">Weight decay</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Learning_Rate_Decay"><span class="toc-number">1.1.3.</span> <span class="toc-text">Learning Rate Decay</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Momentum"><span class="toc-number">1.1.4.</span> <span class="toc-text">Momentum</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SGD优缺点"><span class="toc-number">1.2.</span> <span class="toc-text">SGD优缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Averaged_Stochastic_Gradient_Descent_(ASGD)"><span class="toc-number">2.</span> <span class="toc-text">Averaged Stochastic Gradient Descent (ASGD)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ASGD的参数"><span class="toc-number">2.1.</span> <span class="toc-text">ASGD的参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ASGD优缺点"><span class="toc-number">2.2.</span> <span class="toc-text">ASGD优缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-_Conjugate_Gradient（共轭梯度法）"><span class="toc-number">3.</span> <span class="toc-text">3. Conjugate Gradient（共轭梯度法）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Limited-memory_Broyden-Fletcher-Goldfarb-Shanno_(LBFGS)_(一种拟牛顿算法)"><span class="toc-number">4.</span> <span class="toc-text">Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS) (一种拟牛顿算法)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#应用分析"><span class="toc-number">5.</span> <span class="toc-text">应用分析</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+<div id="authorInfo">
+	
+	<div class="social-list" class="clearfix">
+		
+		
+		
+		
+		
+	</div>
+</div>
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+			<li><a href="/categories/Book/" title="Book">Book<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Code/" title="Code">Code<sup>1</sup></a></li>
+		
+			<li><a href="/categories/LearningCaffe/" title="LearningCaffe">LearningCaffe<sup>6</sup></a></li>
+		
+			<li><a href="/categories/Note/" title="Note">Note<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Paper/" title="Paper">Paper<sup>2</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/BLAS/" title="BLAS">BLAS<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Boost/" title="Boost">Boost<sup>1</sup></a></li>
+		
+			<li><a href="/tags/CNN/" title="CNN">CNN<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Caffe/" title="Caffe">Caffe<sup>6</sup></a></li>
+		
+			<li><a href="/tags/DeepNet/" title="DeepNet">DeepNet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Optim/" title="Optim">Optim<sup>1</sup></a></li>
+		
+			<li><a href="/tags/PCANet/" title="PCANet">PCANet<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Thread/" title="Thread">Thread<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Torch/" title="Torch">Torch<sup>2</sup></a></li>
+		
+			<li><a href="/tags/《Deep-Learning》/" title="《Deep Learning》">《Deep Learning》<sup>3</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">links to Me</p>
+    <ul>
+      <li><a href="https://github.com/YuFeiGan" target="_blank" title="Github">
+      	<img src="http://uxrepo.com/static/icon-sets/elusive/svg/github.svg" width="50" height="50" />
+      	My Github
+      </a></li>
+
+      <li><a href="http://www.zhihu.com/people/GanYuFei" target="_blank" title="知乎">
+      	<img src="http://static.dapps.net/uploads/2013/05/zhihu-icon.png" width="50" height="50" />
+      	My Zhihu
+      </a></li>
+
+      <li><a href="http://weibo.com/GanYvan" target="_blank" title="微博">
+      	<img src="http://gallery.mailchimp.com/db2f0ea3a68f632de3088eada/images/weibo.png" width="50" height="50" />
+      	My Weibo
+      </a></li>
+
+    </ul>
+</div>
+
+
+  
+  <div class="tagcloudlist">
+    <p class="asidetitle">標簽雲</p>
+    <div class="tagcloudlist clearfix">
+       <a href="/tags/BLAS/" style="font-size: 10px;">BLAS</a> <a href="/tags/Boost/" style="font-size: 10px;">Boost</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/Caffe/" style="font-size: 20px;">Caffe</a> <a href="/tags/DeepNet/" style="font-size: 10px;">DeepNet</a> <a href="/tags/Optim/" style="font-size: 10px;">Optim</a> <a href="/tags/PCANet/" style="font-size: 10px;">PCANet</a> <a href="/tags/Thread/" style="font-size: 10px;">Thread</a> <a href="/tags/Torch/" style="font-size: 13.33px;">Torch</a> <a href="/tags/《Deep-Learning》/" style="font-size: 16.67px;">《Deep Learning》</a>
+    </div>
+  </div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+    
+            <p class="copyright"> © 2015 
+		
+		<a href="http://yoursite.com" target="_blank" title="YuFeiGan">YuFeiGan</a>
+		
+            && Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> && Theme by <a href="http://gengbiao.me" target="_blank" title="coney">coney</a>
+            </div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"null"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-57209432-1', 'auto## e.g. gengbiao.me your google analytics site or set the value as auto.');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
+
